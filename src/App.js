@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Suspense } from "react";
+import React, { useState, useRef, useEffect, Suspense, useFrame } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import {
@@ -11,6 +11,7 @@ import {
 import "./styles.css";
 import Controls from "./Components/Controls";
 import Triangle from "./Components/Triangle/TriangleComponent";
+// import PhyBox from "./Components/PhyBox/PhyBoxComponent";
 
 extend({ OrbitControls });
 
@@ -84,6 +85,16 @@ function Preload() {
   return null;
 }
 
+function Box(props) {
+  const mesh = useRef();
+  return (
+     <mesh {...props} ref={mesh}>
+        <boxGeometry args={[30, 30, 30]} />
+        <meshStandardMaterial color={"orange"} />
+     </mesh>
+  );
+}
+
 
 
 
@@ -135,6 +146,7 @@ export default function App() {
           <Preload />
           <Portals />
         </Suspense>
+        <Box position={[0, 0, 0]}/>
       </Canvas>
 
       <Triangle position={Math.round(camPos)}/>

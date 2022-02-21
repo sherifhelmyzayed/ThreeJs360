@@ -5,6 +5,8 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@react-three/cannon": "^4.7.0",
+    "@react-three/drei": "^8.10.1",
     "create-react-app": "^5.0.0",
     "react": "16.12.0",
     "react-addons-linked-state-mixin": "^15.6.2",
