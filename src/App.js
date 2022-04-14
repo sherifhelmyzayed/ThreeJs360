@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Suspense, useFrame } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import {
@@ -12,6 +12,8 @@ import "./styles.css";
 import Controls from "./Components/Controls";
 import Triangle from "./Components/Triangle/TriangleComponent";
 // import PhyBox from "./Components/PhyBox/PhyBoxComponent";
+// import { CameraShake } from '@react-three/drei'
+
 
 extend({ OrbitControls });
 
@@ -20,31 +22,45 @@ extend({ OrbitControls });
 const places = [
   // Photo by Bryan Goff on Unsplash
   { color: "green", position: [0, 0, 100], url: "/pic1.jpeg", link: 1 },
+  // { color: "orange", position: [0, 50, 100], url: "/docks.jpg", link: 0 },
+  // { color: "green", position: [0, 0, 100], url: "/pic1.jpeg", link: 1 },
   // Photo by Timothy Oldfield on Unsplash
-  { color: "white", position: [0, 0, -15], url: "/docks.jpg", link: 0 }
+  { color: "white", position: [0, 50, 100], url: "/docks.jpg", link: 0 }
 ];
 
 
-function Dome({ position, color, texture, onClick }) {
+function Dome({ position, color, texture, onClick, setHotspotLoc }) {
   const ref = useRef();
   const [hovered, setHovered] = useState(false);
+  const clickHandler = (e) => (
+    (e.shiftKey) ? (
+      setHotspotLoc({ x: e.face.normal.x * 200, y: e.face.normal.y * 200, z: e.face.normal.z * 200 })
+    ) : ''
+  )
   useEffect(
-    () => void (document.body.style.cursor = hovered ? "pointer" : "auto"),
+    () => {
+      console.log(ref)
+      void (document.body.style.cursor = hovered ? "pointer" : "auto")
+    },
     [hovered]
   );
   return (
     <group>
-      <mesh>
-        <sphereBufferGeometry attach="geometry" args={[800, 500, 500]} />
+      <mesh
+        onClick={clickHandler}
+        onDoubleClick={()=>(console.log("SSDSD"))}
+      >
+        <sphereBufferGeometry attach="geometry" args={[200, 200, 200]} />
         <meshBasicMaterial
           attach="material"
           map={texture}
           side={THREE.BackSide}
         />
       </mesh>
+
+
       <mesh
         scale={hovered ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-        ref={ref}
         position={position}
         onClick={onClick}
         onPointerOver={() => setHovered(true)}
@@ -53,20 +69,39 @@ function Dome({ position, color, texture, onClick }) {
         <sphereGeometry attach="geometry" args={[5, 30, 30]} />
         <meshBasicMaterial attach="material" color={color} />
       </mesh>
+
+
+      {/* <mesh
+        position={[0, 0, 1]}
+        onClick={(e) => console.log('click')}
+
+      >
+        <sphereGeometry attach="geometry" args={[50, 30, 30]} />
+        <meshBasicMaterial attach="material" side={THREE.BackSide}
+          opacity={.3} color={'orange'} transparent />
+      </mesh> */}
+
     </group>
   );
 }
 
-function Portals() {
+function Portals(props) {
+  const { setHotspotLoc } = props
+
   const [which, set] = useState(0);
   const { color, position, link } = places[which];
+  const clickHandler = () => {
+    console.log("Clicked")
+    set(link)
+  }
   const maps = useLoader(
     THREE.TextureLoader,
     places.map((place) => place.url)
   );
   return (
     <Dome
-      onClick={() => set(link)}
+      onClick={clickHandler}
+      setHotspotLoc={setHotspotLoc}
       color={color}
       position={position}
       texture={maps[which]}
@@ -88,10 +123,12 @@ function Preload() {
 function Box(props) {
   const mesh = useRef();
   return (
-     <mesh {...props} ref={mesh}>
-        <boxGeometry args={[30, 30, 30]} />
-        <meshStandardMaterial color={"orange"} />
-     </mesh>
+    <mesh {...props} ref={mesh}>
+      <sphereGeometry attach="geometry" args={[6, 10, 10]} />
+      {/* <boxGeometry attach="geometry" args={[30, 30, 30]} /> */}
+
+      <meshBasicMaterial attach="material" color={"orange"} />
+    </mesh>
   );
 }
 
@@ -102,6 +139,7 @@ function Box(props) {
 export default function App() {
   const [camPos, setCamPos] = useState(1);
   const position = useRef(null);
+  const [hotspotLoc, setHotspotLoc] = useState(null)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -109,19 +147,19 @@ export default function App() {
       let loc1 = 0;
       let loc2;
       if (location) {
-            if(location.z >= 0 && location.x >= 0) {
-              loc1 = Math.atan(location.z/location.x);
-              loc2 = loc1 * (180/Math.PI);
-            } else if(location.z >= 0 && location.x < 0) {
-              loc1 = Math.atan(location.x/location.z);
-              loc2 = Math.abs(loc1) * (180/Math.PI) + 90;
-            } else if(location.z < 0 && location.x < 0){
-              loc1 = Math.atan(location.z/location.x);
-              loc2 = Math.abs(loc1) * (180/Math.PI) + 180;
-            } else if(location.z < 0 && location.x >= 0){
-              loc1 = Math.atan(location.x/location.z);
-              loc2 = Math.abs(loc1) * (180/Math.PI) + 270;
-            }
+        if (location.z >= 0 && location.x >= 0) {
+          loc1 = Math.atan(location.z / location.x);
+          loc2 = loc1 * (180 / Math.PI);
+        } else if (location.z >= 0 && location.x < 0) {
+          loc1 = Math.atan(location.x / location.z);
+          loc2 = Math.abs(loc1) * (180 / Math.PI) + 90;
+        } else if (location.z < 0 && location.x < 0) {
+          loc1 = Math.atan(location.z / location.x);
+          loc2 = Math.abs(loc1) * (180 / Math.PI) + 180;
+        } else if (location.z < 0 && location.x >= 0) {
+          loc1 = Math.atan(location.x / location.z);
+          loc2 = Math.abs(loc1) * (180 / Math.PI) + 270;
+        }
         setCamPos(loc2)
       }
     }, 100);
@@ -131,7 +169,7 @@ export default function App() {
 
   return (
     <div className="home">
-      <Canvas concurrent camera={{ position: [1, 0, 0] }}>
+      <Canvas concurrent camera={{ fov: 60, position: [0, 0, 1] }}>
         <Controls
           ref={position}
           enableZoom={false}
@@ -144,12 +182,17 @@ export default function App() {
         </Controls>
         <Suspense fallback={<Dom center>Loading...</Dom>}>
           <Preload />
-          <Portals />
+          <Portals setHotspotLoc={setHotspotLoc} />
         </Suspense>
-        <Box position={[0, 0, 0]}/>
+        {
+          (hotspotLoc) ? (
+
+            <Box position={[hotspotLoc.x, hotspotLoc.y, hotspotLoc.z]} />
+          ) : ''
+        }
       </Canvas>
 
-      <Triangle position={Math.round(camPos)}/>
+      <Triangle setHotspotLoc={setHotspotLoc} coord={position.current} position={Math.round(camPos)} />
 
     </div>
   );

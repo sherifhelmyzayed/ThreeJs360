@@ -17,15 +17,14 @@ transition: opacity 1s;
 export const UserLocation = styled.img`
 width: 50px;
 position: absolute; 
-left: 20px;
-top: 20px;
-transform: rotate(${(props)=>(props.rotate)}deg);
+top: calc(${(props) => (props.position[0])}px - 25px);
+left: calc(${(props) => (props.position[1])}px - 25px);
+transform: rotate(${(props) => (props.rotate)}deg);
 `
 export const FixedMap = styled.img`
 width: 200px;
 heigth: 200px;
 position: relative;
-margin: 20px;
 `
 
 export const Hotspot = styled.div`
@@ -34,9 +33,9 @@ export const Hotspot = styled.div`
     background-color: white;
     border-radius: 50%;
     position: absolute;
-    top: 37px;
-    left: 37px;
 
+    top: calc(${(props) => (props.position[1])}px - 8px);
+    left: calc(${(props) => (props.position[0])}px - 8px);
     &:hover {
         background-color: grey;
         cursor: pointer;
